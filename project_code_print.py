@@ -1,7 +1,8 @@
 # coding:utf-8
 import os
+import sys
 
-DOC_OUTPUT = 'target/output.docx'
+
 TREE_CHILD = '|---'
 TREE_CHILD2 = '|   '
 
@@ -10,6 +11,11 @@ exclude_suffix = ['.pyc', '.docx']
 
 
 def get_docx(file_path):
+    """
+    获取docx文件
+    :param file_path:
+    :return:
+    """
     from docx import Document
     doc_file = None
     if os.path.exists(file_path):
@@ -110,7 +116,6 @@ def traverse_dump(file_path, doc_obj):
                 break
         if not flag:
             continue
-
         # os.path.isdir 一定要传入完整路径, 否则单给文件夹名字, 是无法判断是不是文件夹的
         item_path = os.path.join(file_path, item)
         if os.path.isdir(item_path):
@@ -118,9 +123,17 @@ def traverse_dump(file_path, doc_obj):
         else:
             dump_source_code(item_path, doc_obj)
 
+try:
+    import docx
+except Exception:
+    print("当前python的运行环境没有安装 python-docx 模块, 请使用 pip install python-docx 进行安装.")
+    sys.exit(0)
+
 
 if __name__ == '__main__':
-    from os.path import dirname
-    path = dirname(__file__)
-    str_tree= TreeDir(path).str_trees
-    print(str_tree)
+    dump_dir_path = os.getcwd()
+    output_file = 'code_print.docx'
+    doc_obj = get_docx(output_file)
+    doc_obj.add_paragraph(TreeDir(dump_dir_path).str_trees)
+    traverse_dump(dump_dir_path, doc_obj)
+    doc_obj.save(output_file)
